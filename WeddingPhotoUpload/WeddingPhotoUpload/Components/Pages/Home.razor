@@ -1,0 +1,127 @@
+﻿@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@page "/"
+@using Azure.Storage.Blobs.Specialized
+@using Microsoft.Extensions.Logging
+@using Azure.Storage.Blobs;
+@using Azure.Storage.Blobs.Models;
+
+<PageTitle>Welcome!</PageTitle>
+<MudPaper Class="pa-16 primaryContent" Elevation="3">
+
+    <MudOverlay Visible="_isLoading" DarkBackground="true" Absolute="true">
+        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+    </MudOverlay>
+    <MudText Typo="Typo.h5" Align="Align.Center">Welcome to Nathan and Caroline's Wedding Photo Gallery!</MudText>
+
+    <MudText Align="Align.Center">We first would like to thank you for Celebrating the joining of us in marriage</MudText>
+
+    <MudText Align="Align.Center">We know that everyone is going to have their phones out, so we are ready for all the great photos you take! </MudText>
+
+    <MudText Align="Align.Center">We will try our best to provide a gallery for all the photos you've uploaded, and appreciate and look forward to browsing through them ourselves to remember this day</MudText>
+    <div style="margin:auto; display:flex">
+        <div class="custom-file">
+            <InputFile class="custom-file-input" @ref="inputFile" OnChange="ShowPreview" multiple accept="image/png, image/gif, image/jpeg"></InputFile>
+            <label class="custom-file-label" for="@inputFile?.Element?.Id"></label>
+        </div>
+    </div>
+
+    <div @ref="previewImageHolder">
+    </div>
+    <MudButton OnClick="UploadFiles" Variant="Variant.Filled" Color="Color.Primary" Class="object-center" Style="margin:auto; display:flex">Upload Files</MudButton>
+</MudPaper>
+<style>
+    .custom-file-input::-webkit-file-upload-button {
+        visibility: hidden;
+    }
+
+    .custom-file-input::before {
+        content: 'Select Photos';
+        display: inline-block;
+        background: linear-gradient(top, #f9f9f9, #e3e3e3);
+        border: 1px solid #999;
+        border-radius: 3px;
+        padding: 5px 8px;
+        outline: none;
+        white-space: nowrap;
+        -webkit-user-select: none;
+        cursor: pointer;
+        text-shadow: 1px 1px #fff;
+        font-weight: 700;
+        font-size: 10pt;
+    }
+
+    .custom-file-input:hover::before {
+        border-color: black;
+    }
+
+    .custom-file-input:active::before {
+        background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+    }
+
+</style>
+
+<script>
+    window.previewImage = (inputElem, imgHolderElem) => {
+
+        for (var x = 0; x < inputElem.files.length; x++) {
+            const url = URL.createObjectURL(inputElem.files[x]);
+            var imgElem = document.createElement("img")
+            imgElem.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+            imgElem.src = url;
+            imgElem.style = "max-width:200px;max-height:200px";
+            imgElem.classList.add("mud-image")
+            imgElem.classList.add("object-fill")
+            imgElem.classList.add("object-center")
+            imgElem.classList.add("mud-elevation-25")
+            imgElem.classList.add("rounded-lg")
+
+            imgHolderElem.appendChild(imgElem)
+        }
+    }
+    window.clearImages = (imgHolderElem) => {
+        var element = document.getElementById(imgHolderElem.Id)
+        console.log(imgHolderElem)
+        imgHolderElem.innerHTML = "";
+
+    }
+</script>
+@code {
+#nullable enable
+    private bool _isLoading = false;
+    private List<IBrowserFile> loadedFiles = new();
+    private InputFile? inputFile;
+    private ElementReference previewImageHolder;
+
+    private async Task ShowPreview(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            loadedFiles.Add(file);
+        }
+        await JS.InvokeVoidAsync(
+        "previewImage", inputFile!.Element, previewImageHolder);
+    }
+    private async Task UploadFiles()
+    {
+        _isLoading = true;
+        var connectionstring = "DefaultEndpointsProtocol=https;AccountName=photouploadsa;AccountKey=zVSJQqOvqfZMNKXirl0a6I1JO50QYLJnoxQlnwEqUiSAVg53+O468sLuoiYAyj23b5yRU1FkLnRb+ASthZbchw==;EndpointSuffix=core.windows.net";
+        BlobServiceClient blobServiceClient = new BlobServiceClient(connectionstring);
+        BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("photo-upload");
+        await blobContainerClient.CreateIfNotExistsAsync();
+        foreach (var file in loadedFiles)
+        {
+            BlobClient blobClent = blobContainerClient.GetBlobClient(file.Name);
+            BlobHttpHeaders httpheaders = new BlobHttpHeaders()
+                {
+                    ContentType = file.ContentType,
+                };
+            var res = await blobClent.UploadAsync(file.OpenReadStream(file.Size), httpheaders);
+        }
+        loadedFiles.Clear();
+        _isLoading = false;
+        await JS.InvokeVoidAsync(
+        "clearImages", previewImageHolder);
+        return;
+    }
+}

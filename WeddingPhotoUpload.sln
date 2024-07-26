@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeddingPhotoUpload", "WeddingPhotoUpload\WeddingPhotoUpload\WeddingPhotoUpload.csproj", "{71CDDA6D-79CF-493C-8BAE-B680ABCA9312}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeddingPhotoUpload.Client", "WeddingPhotoUpload\WeddingPhotoUpload.Client\WeddingPhotoUpload.Client.csproj", "{08A560A7-23E8-43B1-8795-4CC68653C2E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71CDDA6D-79CF-493C-8BAE-B680ABCA9312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71CDDA6D-79CF-493C-8BAE-B680ABCA9312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71CDDA6D-79CF-493C-8BAE-B680ABCA9312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71CDDA6D-79CF-493C-8BAE-B680ABCA9312}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08A560A7-23E8-43B1-8795-4CC68653C2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08A560A7-23E8-43B1-8795-4CC68653C2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08A560A7-23E8-43B1-8795-4CC68653C2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08A560A7-23E8-43B1-8795-4CC68653C2E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2F951997-A427-4DDB-83FB-C52B61D57A4D}
+	EndGlobalSection
+EndGlobal

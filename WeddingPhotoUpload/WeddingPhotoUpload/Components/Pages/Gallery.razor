@@ -1,0 +1,54 @@
+﻿@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@page "/Gallery"
+@using Azure.Storage.Blobs.Specialized
+@using Microsoft.Extensions.Logging
+@using Azure.Storage.Blobs;
+@using Azure.Storage.Blobs.Models;
+
+<PageTitle>Welcome!</PageTitle>
+<MudPaper Class="pa-16 primaryContent" Elevation="3">
+    <div @ref="previewImageHolder">
+    </div>
+    <MudButton OnClick="LoadGallery" Variant="Variant.Filled" Color="Color.Primary" Class="object-center" Style="margin:auto; display:flex">Load Gallery</MudButton>
+</MudPaper>
+<script>
+    async function setImageUsingStreaming(imageStream, previewImageHolder){
+        const arrayBuffer = await imageStream.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        var imgElem = document.createElement("img");
+        imgElem.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+        imgElem.src = url;
+        imgElem.style = "max-width:200px;max-height:200px";;
+        imgElem.classList.add("mud-image");
+        imgElem.classList.add("object-fill");
+        imgElem.classList.add("object-center");
+        imgElem.classList.add("mud-elevation-25");
+        imgElem.classList.add("rounded-lg");
+
+        previewImageHolder.appendChild(imgElem);
+    }
+</script>
+@code {
+#nullable enable
+    private ElementReference previewImageHolder;
+    private async Task LoadGallery()
+    {
+
+        string connectionstring = "DefaultEndpointsProtocol=https;AccountName=photouploadsa;AccountKey=zVSJQqOvqfZMNKXirl0a6I1JO50QYLJnoxQlnwEqUiSAVg53+O468sLuoiYAyj23b5yRU1FkLnRb+ASthZbchw==;EndpointSuffix=core.windows.net";
+        BlobServiceClient blobServiceClient = new BlobServiceClient(connectionstring);
+        BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("photo-upload");
+        await blobContainerClient.CreateIfNotExistsAsync();
+        var blobs = blobContainerClient.GetBlobsAsync().ToBlockingEnumerable();
+
+        foreach (var blob in blobs)
+        {
+            var blobclient = new BlobClient(connectionstring, "photo-upload", blob.Name);
+            var blobStream = blobclient.DownloadStreaming();
+            var fileStream = blobStream.Value.Content;
+            var dotnetImageStream = new DotNetStreamReference(fileStream);
+            await JS.InvokeVoidAsync("setImageUsingStreaming", dotnetImageStream, previewImageHolder);
+        }
+    }
+}
