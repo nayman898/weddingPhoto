@@ -1,8 +1,5 @@
 name: Build and deploy .NET Core application to Function App WeddingPhotoUploadFunctions20250129162510
 on:
-  push:
-    branches:
-    - main
 env:
   AZURE_FUNCTIONAPP_NAME: WeddingPhotoUploadFunctions20250129162510
   AZURE_FUNCTIONAPP_PACKAGE_PATH: WeddingPhotoUpload.Functions/published
