@@ -18,7 +18,7 @@ namespace WeddingPhotoUpload.Functions.Functions
         }
 
         [Function("UploadImages")]
-        public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
             Stream stream = new MemoryStream();
             await req.Body.CopyToAsync(stream);

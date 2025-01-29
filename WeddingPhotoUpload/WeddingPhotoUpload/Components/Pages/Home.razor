@@ -1,5 +1,6 @@
 ﻿@inject ISnackbar Snackbar
 @inject IJSRuntime JS
+@inject IConfiguration Configuration
 @page "/"
 @using Azure.Storage.Blobs.Specialized
 @using Microsoft.Extensions.Logging
@@ -117,13 +118,19 @@
                 await browserFileStream.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
                 var fileContent = new StreamContent(memoryStream);
-                client.BaseAddress = new Uri("http://localhost:7169");
+                client.BaseAddress = new Uri(Configuration["FunctionUrl"] ?? "");
+                if(client.BaseAddress == null)
+                {
+                    _isLoading = false;
+                    loadedFiles.Clear();
+                    throw new Exception("Things didn't work man");
+                }
                 HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, "/api/UploadImages");
 
                 fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
                 fileContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "\"Files\"", FileName = $"\"{file.Name}\"" };
                 req.Content = fileContent;
-                await client.SendAsync(req);
+                var response = await client.SendAsync(req);
             }
         }
         loadedFiles.Clear();
