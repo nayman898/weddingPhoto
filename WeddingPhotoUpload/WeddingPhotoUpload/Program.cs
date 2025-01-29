@@ -1,5 +1,4 @@
 using MudBlazor.Services;
-using WeddingPhotoUpload.Client.Pages;
 using WeddingPhotoUpload.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,8 +30,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(WeddingPhotoUpload.Client._Imports).Assembly);
+    .AddInteractiveWebAssemblyRenderMode();
 
 
 

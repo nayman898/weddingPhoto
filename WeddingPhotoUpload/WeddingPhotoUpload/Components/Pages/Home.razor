@@ -5,6 +5,8 @@
 @using Microsoft.Extensions.Logging
 @using Azure.Storage.Blobs;
 @using Azure.Storage.Blobs.Models;
+@using System.Text.Json
+@using WeddingPhotoUpload.Global.DataObjects
 
 <PageTitle>Welcome!</PageTitle>
 <MudPaper Class="pa-16 primaryContent" Elevation="3">
@@ -87,7 +89,7 @@
     }
 </script>
 @code {
-#nullable enable
+    #nullable enable
     private bool _isLoading = false;
     private List<IBrowserFile> loadedFiles = new();
     private InputFile? inputFile;
@@ -95,7 +97,7 @@
 
     private async Task ShowPreview(InputFileChangeEventArgs e)
     {
-        foreach (var file in e.GetMultipleFiles())
+        foreach (var file in e.GetMultipleFiles(100))
         {
             loadedFiles.Add(file);
         }
@@ -105,18 +107,24 @@
     private async Task UploadFiles()
     {
         _isLoading = true;
-        var connectionstring = "DefaultEndpointsProtocol=https;AccountName=photouploadsa;AccountKey=zVSJQqOvqfZMNKXirl0a6I1JO50QYLJnoxQlnwEqUiSAVg53+O468sLuoiYAyj23b5yRU1FkLnRb+ASthZbchw==;EndpointSuffix=core.windows.net";
-        BlobServiceClient blobServiceClient = new BlobServiceClient(connectionstring);
-        BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("photo-upload");
-        await blobContainerClient.CreateIfNotExistsAsync();
         foreach (var file in loadedFiles)
         {
-            BlobClient blobClent = blobContainerClient.GetBlobClient(file.Name);
-            BlobHttpHeaders httpheaders = new BlobHttpHeaders()
-                {
-                    ContentType = file.ContentType,
-                };
-            var res = await blobClent.UploadAsync(file.OpenReadStream(file.Size), httpheaders);
+            HttpClient client = new HttpClient();
+            using (client)
+            {
+                var memoryStream = new MemoryStream();
+                var browserFileStream = file.OpenReadStream(maxAllowedSize: 15_000_000);
+                await browserFileStream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                var fileContent = new StreamContent(memoryStream);
+                client.BaseAddress = new Uri("http://localhost:7169");
+                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, "/api/UploadImages");
+
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                fileContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "\"Files\"", FileName = $"\"{file.Name}\"" };
+                req.Content = fileContent;
+                await client.SendAsync(req);
+            }
         }
         loadedFiles.Clear();
         _isLoading = false;

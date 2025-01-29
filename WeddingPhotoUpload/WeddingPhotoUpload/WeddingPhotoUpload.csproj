@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WeddingPhotoUpload.Client\WeddingPhotoUpload.Client.csproj" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
     <PackageReference Include="MudBlazor" Version="7.0.0" />
     <PackageReference Include="MudBlazor.ThemeManager" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WeddingPhotoUpload.Global\WeddingPhotoUpload.Global.csproj" />
   </ItemGroup>
 
 </Project>
